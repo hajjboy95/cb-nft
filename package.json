@@ -7,7 +7,7 @@
     "test": "npx hardhat test",
     "build": "npx hardhat clean && npx hardhat compile",
     "deploy:rinkeby": "npx hardhat run scripts/deploy-creepbit.js --network rinkeby",
-    "verify": "npx hardhat verify --network rinkeby --constructor-args arguments.js "
+    "verify:rinkeby": "npx hardhat verify --network rinkeby --constructor-args arguments.js "
   },
   "author": "",
   "license": "ISC",
