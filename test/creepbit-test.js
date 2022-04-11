@@ -19,7 +19,9 @@ describe('Creepbit', async () => {
       'cb',
       'cb',
       'test.com/',
-      'test-unrevealed.com'
+      'test-unrevealed.com',
+      ['0xb2Eb923f1a799b6CBAde5df8529613ddAB035Cc5', '0x99339fAEFCBeAc7Ed647F40876bbee495dD13258'],
+      [60, 40]
     )
 
     await creepbit.deployed()
@@ -113,8 +115,8 @@ describe('Creepbit', async () => {
       const tokenUriOne = await creepbit.tokenURI(ownersWallet[0])
       const tokenUriTwo = await creepbit.tokenURI(ownersWallet[1])
 
-      expect(tokenUriOne).to.equal('test.com/1')
-      expect(tokenUriTwo).to.equal('test.com/2')
+      expect(tokenUriOne).to.equal('test.com/0')
+      expect(tokenUriTwo).to.equal('test.com/1')
     })
 
     it('Should revert mint when above maxAmount', async () => {
@@ -153,8 +155,8 @@ describe('Creepbit', async () => {
       const indexBalances = await creepbit.walletOfOwner(user1.address)
 
       await expect(indexBalances.length).to.be.equal(2)
-      await expect(indexBalances[0]).to.be.equal(1)
-      await expect(indexBalances[1]).to.be.equal(2)
+      await expect(indexBalances[0]).to.be.equal(0)
+      await expect(indexBalances[1]).to.be.equal(1)
     })
   })
 
