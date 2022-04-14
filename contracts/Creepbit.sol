@@ -12,7 +12,20 @@ import "./MerkleWhitelist.sol";
 contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     using Strings for uint256;
 
+    struct WardrobeHistory {
+        uint256 dateWarn;
+
+        uint256 creepbitId;
+
+        // NFT address of the collection that's being warn with the watch
+        address wearerAddress;
+        uint256 wearerTokenId;
+
+        address ownerAddress;
+    }
+
     string baseURI;
+
     uint256 public cost = 0.02 ether;
     uint256 public maxSupply = 20;
     uint256 public maxMintAmount = 2;
@@ -23,6 +36,9 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     string public notRevealedUri;
 
     mapping(address => bool) public claimedWhitelist;
+
+    mapping(address => WardrobeHistory[]) public userWardrobeHistory;
+    mapping(uint256 => WardrobeHistory[]) public tokenWardrobeHistory;
 
     constructor(
         string memory _name,
