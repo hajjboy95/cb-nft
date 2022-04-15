@@ -190,8 +190,14 @@ describe('Creepbit', async () => {
       const userWardrobeHistory = await creepbit.connect(user1).getUserWardrobeHistory()
       const creepitWardrobeHistory = await creepbit.connect(user1).getCreepitWardrobeHistory(0)
 
-      console.log('userWardrobehistory', userWardrobeHistory)
-      console.log('creepbitWardrobeHistory', creepitWardrobeHistory)
+      expect(userWardrobeHistory.length).to.equal(1)
+      expect(creepitWardrobeHistory.length).to.equal(1)
+
+      expect(userWardrobeHistory[0].timeWarn).to.equal(timeStamp)
+      expect(userWardrobeHistory[0].creepbitId).to.equal(0)
+      expect(userWardrobeHistory[0].wearerAddress).to.equal(mockNft.address)
+      expect(userWardrobeHistory[0].wearerTokenId).to.equal(0)
+      expect(userWardrobeHistory[0].ownerAddress).to.equal(user1.address)
     })
   })
 
