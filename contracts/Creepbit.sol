@@ -39,7 +39,7 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     mapping(address => bool) public claimedWhitelist;
 
     mapping(address => WardrobeItem[]) public userWardrobeHistory;
-    mapping(uint256 => WardrobeItem[]) public tokenWardrobeHistory;
+    mapping(uint256 => WardrobeItem[]) public creepbitWardrobeHistory;
 
     constructor(
         string memory _name,
@@ -60,11 +60,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         // TODO: check if mixing same contract, should probably prevent that
         // or have a whiltelist of collections that we can mix with
 
-        console.log(wardrobeHistory.timeWarn);
-        console.log(wardrobeHistory.creepbitId);
-        console.log(wardrobeHistory.wearerAddress);
-        console.log(wardrobeHistory.wearerTokenId);
-        console.log(wardrobeHistory.ownerAddress);
         address ownerOfCreepbit = ownerOf(wardrobeHistory.creepbitId);
 
         require(ownerOfCreepbit == msg.sender, "Sender doesn't own the creepbit");
@@ -77,7 +72,7 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         require(wearerNftOwner == msg.sender, "User doesn\'t own the wearer nft");
 
         userWardrobeHistory[msg.sender].push(wardrobeHistory);
-        tokenWardrobeHistory[wardrobeHistory.creepbitId].push(wardrobeHistory);
+        creepbitWardrobeHistory[wardrobeHistory.creepbitId].push(wardrobeHistory);
     }
 
     // internal
@@ -174,9 +169,13 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         return whitelistMerkleRoot;
     }
 
-    function gw() public view returns ( memory mapping(address => WardrobeItem[])) {
-    return userWardrobeHistory;
-}
+    function getUserWardrobeHistory() external view returns (WardrobeItem[] memory) {
+        return userWardrobeHistory[msg.sender];
+    }
+
+    function getCreepitWardrobeHistory(uint256 tokenId) external view returns (WardrobeItem[] memory) {
+        return creepbitWardrobeHistory[tokenId];
+    }
 
     function setReveal(bool _state) public onlyOwner {
         revealed = _state;

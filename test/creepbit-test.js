@@ -176,21 +176,22 @@ describe('Creepbit', async () => {
       await mockNft.mint(user1.address, 2)
     })
 
-    it("Should store history when input it correct", async () => {
+    it("Should store history when input it valid", async () => {
       const timeStamp = (await ethers.provider.getBlock('latest')).timestamp;
 
       const wardrobeItem = {
         timeWarn: timeStamp,
-        creepbitId: 1,
+        creepbitId: 0,
         wearerAddress: mockNft.address,
         wearerTokenId: 0,
         ownerAddress: user1.address
       }
       await creepbit.connect(user1).wear(wardrobeItem)
-      const userWardrobeHistory = await creepbit.gw()
+      const userWardrobeHistory = await creepbit.connect(user1).getUserWardrobeHistory()
+      const creepitWardrobeHistory = await creepbit.connect(user1).getCreepitWardrobeHistory(0)
 
-      // console.log('userWardrobehistory', userWardrobeHistory)
-      // console.log('creepbit', creepbit)
+      console.log('userWardrobehistory', userWardrobeHistory)
+      console.log('creepbitWardrobeHistory', creepitWardrobeHistory)
     })
   })
 
