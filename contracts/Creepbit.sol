@@ -8,11 +8,12 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
 import "./MerkleWhitelist.sol";
+import "hardhat/console.sol";
 
 contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     using Strings for uint256;
 
-    struct WardrobeHistory {
+    struct WardrobeItem {
         uint256 timeWarn;
 
         uint256 creepbitId;
@@ -37,8 +38,8 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     mapping(address => bool) public claimedWhitelist;
 
-    mapping(address => WardrobeHistory[]) public userWardrobeHistory;
-    mapping(uint256 => WardrobeHistory[]) public tokenWardrobeHistory;
+    mapping(address => WardrobeItem[]) public userWardrobeHistory;
+    mapping(uint256 => WardrobeItem[]) public tokenWardrobeHistory;
 
     constructor(
         string memory _name,
@@ -52,19 +53,26 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         setNotRevealedURI(_initNotRevealedUri);
     }
 
-    function wear(WardrobeHistory memory wardrobeHistory) {
-        require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn\'t match");
+    // external
 
+    function wear(WardrobeItem memory wardrobeHistory) external {
+        require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn\'t match");
+        // TODO: check if mixing same contract, should probably prevent that
+        // or have a whiltelist of collections that we can mix with
+
+        console.log(wardrobeHistory.timeWarn);
+        console.log(wardrobeHistory.creepbitId);
+        console.log(wardrobeHistory.wearerAddress);
+        console.log(wardrobeHistory.wearerTokenId);
+        console.log(wardrobeHistory.ownerAddress);
         address ownerOfCreepbit = ownerOf(wardrobeHistory.creepbitId);
 
         require(ownerOfCreepbit == msg.sender, "Sender doesn't own the creepbit");
+        require(block.timestamp - 3600 < wardrobeHistory.timeWarn, "Invalid timewarn value");
 
-        require(found, "User doesn\'t own the nft");
-        require(block.timestamp - 3600 > wardrobeHistory.timeWarn, "Invalid timewarn value");
-
-        IERC721 nft = IERC721(wardrobeHistory.wearerAddress);
+        IERC721 wearerNft = IERC721(wardrobeHistory.wearerAddress);
         // TODO: check if this is safe
-        address wearerNftOwner = nft.ownerOf(wardrobeHistory.wearerTokenId);
+        address wearerNftOwner = wearerNft.ownerOf(wardrobeHistory.wearerTokenId);
 
         require(wearerNftOwner == msg.sender, "User doesn\'t own the wearer nft");
 
@@ -163,8 +171,12 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     }
 
     function getMerkleRootHash() public view onlyOwner returns (bytes32) {
-       return whitelistMerkleRoot;
+        return whitelistMerkleRoot;
     }
+
+    function gw() public view returns ( memory mapping(address => WardrobeItem[])) {
+    return userWardrobeHistory;
+}
 
     function setReveal(bool _state) public onlyOwner {
         revealed = _state;

@@ -7,6 +7,7 @@ chai.use(solidity)
 
 describe('Creepbit', async () => {
   let creepbit
+  let mockNft
   let owner
   let user1
   let user2
@@ -25,6 +26,7 @@ describe('Creepbit', async () => {
     )
 
     await creepbit.deployed()
+
     creepbit.setWhitelistMerkleRoot('0x78ba61eadae58b0006723de8fcfbbb9d1c6d5919b8e4b23d1347923b58400bef')
   })
 
@@ -157,6 +159,38 @@ describe('Creepbit', async () => {
       await expect(indexBalances.length).to.be.equal(2)
       await expect(indexBalances[0]).to.be.equal(0)
       await expect(indexBalances[1]).to.be.equal(1)
+    })
+  })
+
+  describe("wear", () => {
+    let mockNft
+
+    beforeEach(async () => {
+      await creepbit.setPause(false)
+      await creepbit.setWhitelistMintingPeriod(false)
+      await creepbit.connect(user1).mint(2, { value: ethers.utils.parseEther("0.04") })
+
+      const MockNft = await ethers.getContractFactory('MockNft')
+      mockNft = await MockNft.deploy()
+      await mockNft.deployed()
+      await mockNft.mint(user1.address, 2)
+    })
+
+    it("Should store history when input it correct", async () => {
+      const timeStamp = (await ethers.provider.getBlock('latest')).timestamp;
+
+      const wardrobeItem = {
+        timeWarn: timeStamp,
+        creepbitId: 1,
+        wearerAddress: mockNft.address,
+        wearerTokenId: 0,
+        ownerAddress: user1.address
+      }
+      await creepbit.connect(user1).wear(wardrobeItem)
+      const userWardrobeHistory = await creepbit.gw()
+
+      // console.log('userWardrobehistory', userWardrobeHistory)
+      // console.log('creepbit', creepbit)
     })
   })
 
