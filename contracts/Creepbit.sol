@@ -14,12 +14,12 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     using Strings for uint256;
 
     struct WardrobeItem {
-        uint256 timeWarn;
+        uint256 timeWorn;
 
         uint256 creepbitId;
 
         // NFT address of the collection that's being warn with the watch
-        address wearerAddress;
+        IERC721 wearerAddress;
         uint256 wearerTokenId;
 
         address ownerAddress;
@@ -58,16 +58,17 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     function wear(WardrobeItem memory wardrobeHistory) external {
         require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn\'t match");
         // TODO: check if mixing same contract, should probably prevent that
-        // or have a whiltelist of collections that we can mix with
+        // or have a whitelist of collections that we can mix with
 
         address ownerOfCreepbit = ownerOf(wardrobeHistory.creepbitId);
 
         require(ownerOfCreepbit == msg.sender, "Sender doesn't own the creepbit");
-        require(block.timestamp - 3600 < wardrobeHistory.timeWarn, "Invalid timewarn value");
+        require(block.timestamp - 3600 < wardrobeHistory.timeWorn, "Invalid timeWorn value");
 
-        IERC721 wearerNft = IERC721(wardrobeHistory.wearerAddress);
+        IERC721 wearerNft = wardrobeHistory.wearerAddress;
         // TODO: check if this is safe
         address wearerNftOwner = wearerNft.ownerOf(wardrobeHistory.wearerTokenId);
+        console.log("wearerNftOwner", wearerNftOwner);
 
         require(wearerNftOwner == msg.sender, "User doesn\'t own the wearer nft");
 
@@ -169,11 +170,11 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         return whitelistMerkleRoot;
     }
 
-    function getUserWardrobeHistory() external view returns (WardrobeItem[] memory) {
-        return userWardrobeHistory[msg.sender];
+    function getUserWardrobeHistory(address user) external view returns (WardrobeItem[] memory) {
+        return userWardrobeHistory[user];
     }
 
-    function getCreepitWardrobeHistory(uint256 tokenId) external view returns (WardrobeItem[] memory) {
+    function getCreepbitWardrobeHistory(uint256 tokenId) external view returns (WardrobeItem[] memory) {
         return creepbitWardrobeHistory[tokenId];
     }
 
