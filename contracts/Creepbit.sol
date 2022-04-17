@@ -18,7 +18,7 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
         uint256 creepbitId;
 
-        // NFT address of the collection that's being warn with the watch
+        // NFT address of the collection that's being worn with the watch
         IERC721 wearerAddress;
         uint256 wearerTokenId;
 
@@ -55,7 +55,8 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     // external
 
-    function wear(WardrobeItem memory wardrobeHistory) external {
+    // TODO: mark as payable and implement payment logic
+    function wear(WardrobeItem memory wardrobeHistory) external payable {
         require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn\'t match");
         // TODO: check if mixing same contract, should probably prevent that
         // or have a whitelist of collections that we can mix with
@@ -68,7 +69,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         IERC721 wearerNft = wardrobeHistory.wearerAddress;
         // TODO: check if this is safe
         address wearerNftOwner = wearerNft.ownerOf(wardrobeHistory.wearerTokenId);
-        console.log("wearerNftOwner", wearerNftOwner);
 
         require(wearerNftOwner == msg.sender, "User doesn\'t own the wearer nft");
 
@@ -204,9 +204,5 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     function setWhitelistMintingPeriod(bool _state) public onlyOwner {
         whitelistMintingPeriod = _state;
-    }
-
-    function _startTokenId() internal view virtual override returns (uint256) {
-        return 0;
     }
 }

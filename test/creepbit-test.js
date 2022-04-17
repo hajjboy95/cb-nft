@@ -175,6 +175,7 @@ describe('Creepbit', async () => {
       await creepbit.setPause(false)
       await creepbit.setWhitelistMintingPeriod(false)
       await creepbit.connect(user1).mint(2, { value: ethers.utils.parseEther("0.04") })
+      await creepbit.connect(user2).mint(2, { value: ethers.utils.parseEther("0.04") })
 
       const MockNft = await ethers.getContractFactory('MockNft')
       mockNft = await MockNft.deploy()
@@ -222,16 +223,21 @@ describe('Creepbit', async () => {
       await expect(creepbit.connect(user1).wear(wardrobeItem)).to.be.revertedWith("Invalid timeWorn value")
     })
 
-    it("Should fail adding history if user doesn\'t own the creepbit", async () => {
-      wardrobeItem.creepbitId = 3
+    it("Should fail adding history if creepbit doesn't exist", async () => {
+      wardrobeItem.creepbitId = 101
       await expect(creepbit.connect(user1).wear(wardrobeItem)).to.be.revertedWith('OwnerQueryForNonexistentToken()')
     })
 
-    it("Should fail adding history is user doesn\'t own the wearerNft", async () => {
-      console.log('wardrobeItem', wardrobeItem)
-      wardrobeItem.wearerAddress = unownedMockNft.address
-      console.log('wardrobeItem', wardrobeItem)
-      await expect(creepbit.connect(user1).wear(wardrobeItem))
+    it("Should fail adding history if user doesn't own the wearerNft", async () => {
+      wardrobeItem.creepbitId = 2
+      wardrobeItem.ownerAddress = user2.address
+
+      await expect(creepbit.connect(user2).wear(wardrobeItem)).to.be.revertedWith("User doesn\'t own the wearer nft")
+    })
+
+    it("Should fail adding history if user doesn't own the wearerNft", async () => {
+      wardrobeItem.creepbitId = 2
+      await expect(creepbit.connect(user1).wear(wardrobeItem)).to.be.revertedWith("Sender doesn't own the creepbit")
     })
   })
 
