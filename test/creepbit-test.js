@@ -167,7 +167,6 @@ describe('Creepbit', async () => {
 
   describe("wear", () => {
     let mockNft
-    let unownedMockNft
     let wardrobeItem
     let nowTimestamp
 
@@ -182,10 +181,6 @@ describe('Creepbit', async () => {
       await mockNft.deployed()
 
       await mockNft.mint(user1.address, 2)
-
-      const UnownedMockNft = await ethers.getContractFactory('MockNft')
-      unownedMockNft = await UnownedMockNft.deploy()
-      await unownedMockNft.deployed()
 
       nowTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
 
