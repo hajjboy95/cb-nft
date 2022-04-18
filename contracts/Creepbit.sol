@@ -60,7 +60,7 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     function wear(WardrobeItem memory wardrobeHistory) external payable {
         require(msg.value >= wearCost, "Amount sent is too little");
         require(whitelistedContracts[wardrobeHistory.wearerAddress], "Wearer contract must be whitelisted");
-        require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn\'t match");
+        require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn't match");
 
         address ownerOfCreepbit = ownerOf(wardrobeHistory.creepbitId);
 
@@ -68,10 +68,9 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         require(block.timestamp - 3600 < wardrobeHistory.timeWorn, "Invalid timeWorn value");
 
         IERC721 wearerNft = IERC721(wardrobeHistory.wearerAddress);
-        // TODO: check if this is safe
         address wearerNftOwner = wearerNft.ownerOf(wardrobeHistory.wearerTokenId);
 
-        require(wearerNftOwner == msg.sender, "User doesn\'t own the wearer nft");
+        require(wearerNftOwner == msg.sender, "User doesn't own the wearer nft");
 
         userWardrobeHistory[msg.sender].push(wardrobeHistory);
         creepbitWardrobeHistory[wardrobeHistory.creepbitId].push(wardrobeHistory);
