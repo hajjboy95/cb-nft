@@ -77,47 +77,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         creepbitWardrobeHistory[wardrobeHistory.creepbitId].push(wardrobeHistory);
     }
 
-    // internal
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseURI;
-    }
-
-    function _mintGeneralChecks(uint256 _mintAmount, uint256 _supply) private {
-        require(!paused, "Currently paused");
-        require(_mintAmount > 0, "Mint amount must be greater than 1");
-        require(_mintAmount <= maxMintAmount, "Above max mint threshold");
-
-
-        require(_supply + _mintAmount <= maxSupply);
-
-        if (msg.sender != owner()) {
-            require(msg.value >= cost * _mintAmount, "Mint cost too low");
-        }
-    }
-
-    // public
-    function mint(uint256 _mintAmount) public payable {
-        require(!whitelistMintingPeriod, "Whitelist minting period is currently on");
-
-        uint256 supply = totalSupply();
-
-        _mintGeneralChecks(_mintAmount, supply);
-        _safeMint(msg.sender, _mintAmount);
-    }
-
-    function whitelistMint(uint256 _mintAmount, bytes32[] memory proof) public payable  {
-        require(whitelistMintingPeriod, "Whitelist period complete");
-
-        uint256 supply = totalSupply();
-        _mintGeneralChecks(_mintAmount, supply);
-
-        require(!claimedWhitelist[msg.sender], "Already claimed your whitelist slot");
-        require(verifySender(proof, msg.sender), "Not whitelisted");
-
-        claimedWhitelist[msg.sender] = true;
-
-        _safeMint(msg.sender, _mintAmount);
-    }
 
     function walletOfOwner(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
@@ -145,32 +104,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         return ownedTokenIds;
     }
 
-    function tokenURI(uint256 tokenId)
-    public
-    view
-    virtual
-    override
-    returns (string memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-
-        if(revealed == false) {
-            return notRevealedUri;
-        }
-
-        string memory currentBaseURI = _baseURI();
-        return bytes(currentBaseURI).length > 0
-        ? string(abi.encodePacked(currentBaseURI, tokenId.toString()))
-        : "";
-    }
-
-    function getMerkleRootHash() public view onlyOwner returns (bytes32) {
-        return whitelistMerkleRoot;
-    }
-
     function getUserWardrobeHistory(address user) external view returns (WardrobeItem[] memory) {
         return userWardrobeHistory[user];
     }
@@ -195,14 +128,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         maxMintAmount = _newMaxMintAmount;
     }
 
-    function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
-        notRevealedUri = _notRevealedURI;
-    }
-
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
-        baseURI = _newBaseURI;
-    }
-
     function setPause(bool _state) external onlyOwner {
         paused = _state;
     }
@@ -220,6 +145,77 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     function removeWhitelistWearerAddress(address[] memory contracts) external onlyOwner {
         for (uint256 i = 0; i < contracts.length; i++) {
             delete whitelistedContracts[contracts[i]];
+        }
+    }
+
+    function mint(uint256 _mintAmount) external payable {
+        require(!whitelistMintingPeriod, "Whitelist minting period is currently on");
+
+        uint256 supply = totalSupply();
+
+        _mintGeneralChecks(_mintAmount, supply);
+        _safeMint(msg.sender, _mintAmount);
+    }
+
+    function whitelistMint(uint256 _mintAmount, bytes32[] memory proof) external payable  {
+        require(whitelistMintingPeriod, "Whitelist period complete");
+
+        uint256 supply = totalSupply();
+        _mintGeneralChecks(_mintAmount, supply);
+
+        require(!claimedWhitelist[msg.sender], "Already claimed your whitelist slot");
+        require(verifySender(proof, msg.sender), "Not whitelisted");
+
+        claimedWhitelist[msg.sender] = true;
+
+        _safeMint(msg.sender, _mintAmount);
+    }
+
+    function getMerkleRootHash() external view onlyOwner returns (bytes32) {
+        return whitelistMerkleRoot;
+    }
+
+    // public
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory){
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+
+        if(revealed == false) {
+            return notRevealedUri;
+        }
+
+        string memory currentBaseURI = _baseURI();
+        return bytes(currentBaseURI).length > 0
+        ? string(abi.encodePacked(currentBaseURI, tokenId.toString()))
+        : "";
+    }
+
+    function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
+        notRevealedUri = _notRevealedURI;
+    }
+
+    function setBaseURI(string memory _newBaseURI) public onlyOwner {
+        baseURI = _newBaseURI;
+    }
+
+    // internal
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
+    }
+
+    // private
+
+    function _mintGeneralChecks(uint256 _mintAmount, uint256 _supply) private {
+        require(!paused, "Currently paused");
+        require(_mintAmount > 0, "Mint amount must be greater than 1");
+        require(_mintAmount <= maxMintAmount, "Above max mint threshold");
+
+
+        require(_supply + _mintAmount <= maxSupply);
+
+        if (msg.sender != owner()) {
+            require(msg.value >= cost * _mintAmount, "Mint cost too low");
         }
     }
 }
