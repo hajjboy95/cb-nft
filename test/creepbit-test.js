@@ -194,7 +194,7 @@ describe('Creepbit', async () => {
     })
 
     it("Should store history when input it valid", async () => {
-      await creepbit.connect(user1).wear(wardrobeItem)
+      await creepbit.connect(user1).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") })
       const userWardrobeHistory = await creepbit.getUserWardrobeHistory(user1.address)
       const creepitWardrobeHistory = await creepbit.getCreepbitWardrobeHistory(0)
 
@@ -213,26 +213,30 @@ describe('Creepbit', async () => {
       expect(creepitWardrobeHistory[0].ownerAddress).to.equal(user1.address)
     })
 
+    it("Should fail adding history if amount sent is too little", async () => {
+      await expect(creepbit.connect(user1).wear(wardrobeItem, {  value: ethers.utils.parseEther("0.19") })).to.be.revertedWith("Amount sent too little")
+    })
+
     it("Should fail adding history if timestamp is invalid", async () => {
       wardrobeItem.timeWorn = nowTimestamp - 3660
-      await expect(creepbit.connect(user1).wear(wardrobeItem)).to.be.revertedWith("Invalid timeWorn value")
+      await expect(creepbit.connect(user1).wear(wardrobeItem, {  value: ethers.utils.parseEther("0.2") })).to.be.revertedWith("Invalid timeWorn value")
     })
 
     it("Should fail adding history if creepbit doesn't exist", async () => {
       wardrobeItem.creepbitId = 101
-      await expect(creepbit.connect(user1).wear(wardrobeItem)).to.be.revertedWith('OwnerQueryForNonexistentToken()')
+      await expect(creepbit.connect(user1).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") })).to.be.revertedWith('OwnerQueryForNonexistentToken()')
     })
 
     it("Should fail adding history if user doesn't own the wearerNft", async () => {
       wardrobeItem.creepbitId = 2
       wardrobeItem.ownerAddress = user2.address
 
-      await expect(creepbit.connect(user2).wear(wardrobeItem)).to.be.revertedWith("User doesn\'t own the wearer nft")
+      await expect(creepbit.connect(user2).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") })).to.be.revertedWith("User doesn\'t own the wearer nft")
     })
 
     it("Should fail adding history if user doesn't own the wearerNft", async () => {
       wardrobeItem.creepbitId = 2
-      await expect(creepbit.connect(user1).wear(wardrobeItem)).to.be.revertedWith("Sender doesn't own the creepbit")
+      await expect(creepbit.connect(user1).wear(wardrobeItem,  { value: ethers.utils.parseEther("0.2") })).to.be.revertedWith("Sender doesn't own the creepbit")
     })
   })
 

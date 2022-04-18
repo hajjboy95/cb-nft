@@ -27,7 +27,9 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     string baseURI;
 
+
     uint256 public cost = 0.02 ether;
+    uint256 public wearCost = 0.2 ether;
     uint256 public maxSupply = 20;
     uint256 public maxMintAmount = 2;
 
@@ -57,7 +59,10 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     // TODO: mark as payable and implement payment logic
     function wear(WardrobeItem memory wardrobeHistory) external payable {
+        require(msg.value >= wearCost, "Amount sent too little");
         require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn\'t match");
+        // TODO: Check if wearerAddress is whitelisted
+
         // TODO: check if mixing same contract, should probably prevent that
         // or have a whitelist of collections that we can mix with
 
