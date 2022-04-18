@@ -29,8 +29,8 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     uint256 public cost = 0.02 ether;
     uint256 public wearCost = 0.2 ether;
-    uint256 public maxSupply = 20;
-    uint256 public maxMintAmount = 2;
+    uint256 public maxSupply = 10000;
+    uint256 public maxMintAmount = 10;
 
     bool public paused = true;
     bool public revealed = false;
@@ -75,7 +75,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         userWardrobeHistory[msg.sender].push(wardrobeHistory);
         creepbitWardrobeHistory[wardrobeHistory.creepbitId].push(wardrobeHistory);
     }
-
 
     function walletOfOwner(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);

@@ -7,7 +7,6 @@ chai.use(solidity)
 
 describe('Creepbit', async () => {
   let creepbit
-  let mockNft
   let owner
   let user1
   let user2
@@ -36,9 +35,10 @@ describe('Creepbit', async () => {
     })
 
     it('Should have correct initial state', async () => {
-      expect(await creepbit.maxSupply()).to.be.equal(20)
-      expect((await creepbit.cost()).toString()).to.be.equal('20000000000000000')
-      expect(await creepbit.maxMintAmount()).to.be.equal(2)
+      expect(await creepbit.maxSupply()).to.be.equal(10000)
+      expect((await creepbit.cost()).toString()).to.be.equal(ethers.utils.parseEther("0.02"))
+      expect((await creepbit.wearCost()).toString()).to.be.equal(ethers.utils.parseEther("0.2"))
+      expect(await creepbit.maxMintAmount()).to.be.equal(10)
       expect(await creepbit.paused()).to.be.equal(true)
       expect(await creepbit.revealed()).to.be.equal(false)
       expect(await creepbit.whitelistMintingPeriod()).to.be.equal(false)
@@ -124,7 +124,7 @@ describe('Creepbit', async () => {
     it('Should revert mint when above maxAmount', async () => {
       await creepbit.setPause(false)
       await creepbit.setWhitelistMintingPeriod(false)
-      await expect(creepbit.mint(4)).to.be.revertedWith("Above max mint threshold")
+      await expect(creepbit.mint(11)).to.be.revertedWith("Above max mint threshold")
     })
 
     it('Should revert mint when paused', async () => {
