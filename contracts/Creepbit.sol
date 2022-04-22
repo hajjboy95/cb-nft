@@ -37,11 +37,11 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     bool public whitelistMintingPeriod = false;
     string public notRevealedUri;
 
-    mapping(address => bool) public claimedWhitelist;
+    mapping(address => bool) private claimedWhitelist;
 
-    mapping(address => WardrobeItem[]) public userWardrobeHistory;
-    mapping(uint256 => WardrobeItem[]) public creepbitWardrobeHistory;
-    mapping(address => bool) public whitelistedContracts;
+    mapping(address => WardrobeItem[]) private userWardrobeHistory;
+    mapping(uint256 => WardrobeItem[]) private creepbitWardrobeHistory;
+    mapping(address => bool) private whitelistedContracts;
 
     constructor(
         string memory _name,
@@ -55,7 +55,7 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         setNotRevealedURI(_initNotRevealedUri);
     }
 
-    // external
+    // External functions
 
     function wear(WardrobeItem calldata wardrobeHistory) external payable {
         require(msg.value >= wearCost, "Amount sent is too little");
@@ -74,40 +74,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
         userWardrobeHistory[msg.sender].push(wardrobeHistory);
         creepbitWardrobeHistory[wardrobeHistory.creepbitId].push(wardrobeHistory);
-    }
-
-    function walletOfOwner(address _owner) external view returns (uint256[] memory) {
-        uint256 ownerTokenCount = balanceOf(_owner);
-        uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
-        uint256 currentTokenId = _startTokenId();
-        uint256 ownedTokenIndex = 0;
-        address latestOwnerAddress;
-
-        while (ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply) {
-            TokenOwnership memory ownership = _ownerships[currentTokenId];
-
-            if (!ownership.burned && ownership.addr != address(0)) {
-                latestOwnerAddress = ownership.addr;
-            }
-
-            if (latestOwnerAddress == _owner) {
-                ownedTokenIds[ownedTokenIndex] = currentTokenId;
-
-                ownedTokenIndex++;
-            }
-
-            currentTokenId++;
-        }
-
-        return ownedTokenIds;
-    }
-
-    function getUserWardrobeHistory(address user) external view returns (WardrobeItem[] memory) {
-        return userWardrobeHistory[user];
-    }
-
-    function getCreepbitWardrobeHistory(uint256 tokenId) external view returns (WardrobeItem[] memory) {
-        return creepbitWardrobeHistory[tokenId];
     }
 
     function setReveal(bool _state) external onlyOwner {
@@ -169,11 +135,57 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         _safeMint(msg.sender, _mintAmount);
     }
 
+    // External functions that are view
+
+    function walletOfOwner(address _owner) external view returns (uint256[] memory) {
+        uint256 ownerTokenCount = balanceOf(_owner);
+        uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
+        uint256 currentTokenId = _startTokenId();
+        uint256 ownedTokenIndex = 0;
+        address latestOwnerAddress;
+
+        while (ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply) {
+            TokenOwnership memory ownership = _ownerships[currentTokenId];
+
+            if (!ownership.burned && ownership.addr != address(0)) {
+                latestOwnerAddress = ownership.addr;
+            }
+
+            if (latestOwnerAddress == _owner) {
+                ownedTokenIds[ownedTokenIndex] = currentTokenId;
+
+                ownedTokenIndex++;
+            }
+
+            currentTokenId++;
+        }
+
+        return ownedTokenIds;
+    }
+
+    function getUserWardrobeHistory(address user) external view returns (WardrobeItem[] memory) {
+        return userWardrobeHistory[user];
+    }
+
+    function getCreepbitWardrobeHistory(uint256 tokenId) external view returns (WardrobeItem[] memory) {
+        return creepbitWardrobeHistory[tokenId];
+    }
+
     function getMerkleRootHash() external view onlyOwner returns (bytes32) {
         return whitelistMerkleRoot;
     }
 
-    // public
+    // Public functions
+
+    function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
+        notRevealedUri = _notRevealedURI;
+    }
+
+    function setBaseURI(string memory _newBaseURI) public onlyOwner {
+        baseURI = _newBaseURI;
+    }
+
+    // Public functions that are view
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory){
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
@@ -188,21 +200,15 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         : "";
     }
 
-    function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
-        notRevealedUri = _notRevealedURI;
-    }
+    // Internal functions
 
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
-        baseURI = _newBaseURI;
-    }
-
-    // internal
+    // Internal functions that are view
 
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
-    // private
+    // Private functions
 
     function _mintGeneralChecks(uint256 _mintAmount, uint256 _supply) private {
         require(!paused, "Currently paused");
