@@ -57,7 +57,7 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     // external
 
-    function wear(WardrobeItem memory wardrobeHistory) external payable {
+    function wear(WardrobeItem calldata wardrobeHistory) external payable {
         require(msg.value >= wearCost, "Amount sent is too little");
         require(whitelistedContracts[wardrobeHistory.wearerAddress], "Wearer contract must be whitelisted");
         require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn't match");
@@ -134,13 +134,13 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         whitelistMintingPeriod = _state;
     }
 
-    function addWhitelistWearerAddress(address[] memory contracts) external onlyOwner {
+    function addWhitelistWearerAddress(address[] calldata contracts) external onlyOwner {
         for (uint256 i = 0; i < contracts.length; i++) {
             whitelistedContracts[contracts[i]] = true;
         }
     }
 
-    function removeWhitelistWearerAddress(address[] memory contracts) external onlyOwner {
+    function removeWhitelistWearerAddress(address[] calldata contracts) external onlyOwner {
         for (uint256 i = 0; i < contracts.length; i++) {
             delete whitelistedContracts[contracts[i]];
         }
@@ -155,7 +155,7 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         _safeMint(msg.sender, _mintAmount);
     }
 
-    function whitelistMint(uint256 _mintAmount, bytes32[] memory proof) external payable  {
+    function whitelistMint(uint256 _mintAmount, bytes32[] calldata proof) external payable  {
         require(whitelistMintingPeriod, "Whitelist period complete");
 
         uint256 supply = totalSupply();
