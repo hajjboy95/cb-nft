@@ -20,7 +20,7 @@ describe('Creepbit', async () => {
       'cb',
       'test.com/',
       'test-unrevealed.com',
-      ['0xb2Eb923f1a799b6CBAde5df8529613ddAB035Cc5', '0x99339fAEFCBeAc7Ed647F40876bbee495dD13258'],
+      [user1.address, user2.address],
       [60, 40]
     )
 
@@ -162,6 +162,36 @@ describe('Creepbit', async () => {
       await expect(indexBalances.length).to.be.equal(2)
       await expect(indexBalances[0]).to.be.equal(0)
       await expect(indexBalances[1]).to.be.equal(1)
+    })
+  })
+
+  describe("PaymentSplitter", () => {
+
+   beforeEach(async () => {
+     await creepbit.setPause(false)
+     await creepbit.setWhitelistMintingPeriod(false)
+
+     await creepbit.connect(user1).mint(8, { value: ethers.utils.parseEther("0.16") })
+     await creepbit.connect(user2).mint(2, { value: ethers.utils.parseEther("0.04") })
+   })
+
+    it("Should have totalShares to equal 100", async () => {
+      const totalShares = await creepbit.totalShares()
+      console.log('totalShares', totalShares)
+      expect(totalShares.toNumber()).to.equal(100)
+    })
+
+    it("Should have the correct share split", async () => {
+      const user1Shares = await creepbit.shares(user1.address)
+      const user2Shares = await creepbit.shares(user2.address)
+
+      expect(user1Shares.toNumber()).to.equal(60)
+      expect(user2Shares.toNumber()).to.equal(40)
+    })
+
+    it("Should release the correct amount for the user", async () => {
+      const a = await creepbit.release(user1.address)
+      console.log('a', a)
     })
   })
 

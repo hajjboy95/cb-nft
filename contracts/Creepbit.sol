@@ -46,8 +46,8 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     constructor(
         string memory _name,
         string memory _symbol,
-        string memory _initBaseURI,
-        string memory _initNotRevealedUri,
+        string memory _initBaseURI, // metadata cid
+        string memory _initNotRevealedUri, // metadata cid
         address[] memory _payees,
         uint256[] memory _shares
     ) ERC721A(_name, _symbol) PaymentSplitter(_payees, _shares) payable {
