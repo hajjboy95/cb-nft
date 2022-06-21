@@ -189,10 +189,10 @@ describe('Creepbit', async () => {
       expect(user2Shares.toNumber()).to.equal(40)
     })
 
-    it("Should release the correct amount for the user", async () => {
-      const a = await creepbit.release(user1.address)
-      console.log('a', a)
-    })
+    // it("Should release the correct amount for the user", async () => {
+    //   const a = await creepbit.release(user1.address)
+    //   console.log('a', a)
+    // })
   })
 
   describe("wear", () => {
