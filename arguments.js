@@ -1,5 +1,5 @@
 module.exports = [
-    'Cbit6',
+    'Cbit7',
     'cbt',
     'ipfs://QmdHnu4TCcHRY474p97F8srtHwGagpYL4oJRxE5wcVYwYY/',
     'ipfs://QmeNArqPdUWU3xpfxkzgxQqxsU9Hx2VnQEJ7P2aAaAgzer/hidden',
