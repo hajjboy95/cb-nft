@@ -37,7 +37,7 @@ describe('Creepbit', async () => {
     it('Should have correct initial state', async () => {
       expect(await creepbit.maxSupply()).to.be.equal(10000)
       expect((await creepbit.cost()).toString()).to.be.equal(ethers.utils.parseEther("0.02"))
-      expect((await creepbit.wearCost()).toString()).to.be.equal(ethers.utils.parseEther("0.2"))
+      // expect((await creepbit.wearCost()).toString()).to.be.equal(ethers.utils.parseEther("0.2"))
       expect(await creepbit.maxMintAmount()).to.be.equal(10)
       expect(await creepbit.paused()).to.be.equal(true)
       expect(await creepbit.revealed()).to.be.equal(false)
@@ -195,92 +195,92 @@ describe('Creepbit', async () => {
     // })
   })
 
-  describe("wear", () => {
-    let mockNft
-    let wardrobeItem
-    let nowTimestamp
-
-    beforeEach(async () => {
-      const MockNft = await ethers.getContractFactory('MockNft')
-      mockNft = await MockNft.deploy()
-      await mockNft.deployed()
-
-      await mockNft.mint(user1.address, 2)
-
-      await creepbit.setPause(false)
-      await creepbit.setWhitelistMintingPeriod(false)
-      await creepbit.connect(user1).mint(2, { value: ethers.utils.parseEther("0.04") })
-      await creepbit.connect(user2).mint(2, { value: ethers.utils.parseEther("0.04") })
-      await creepbit.addWhitelistWearerAddress([mockNft.address])
-
-      nowTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
-
-      wardrobeItem = {
-        timeWorn: nowTimestamp,
-        creepbitId: 0,
-        wearerAddress: mockNft.address,
-        wearerTokenId: 0,
-        ownerAddress: user1.address
-      }
-    })
-
-    it("Should store history when input it valid", async () => {
-      await creepbit.connect(user1).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") })
-      const userWardrobeHistory = await creepbit.getUserWardrobeHistory(user1.address)
-      const creepitWardrobeHistory = await creepbit.getCreepbitWardrobeHistory(0)
-
-      expect(userWardrobeHistory.length).to.equal(1)
-      expect(userWardrobeHistory[0].timeWorn).to.equal(nowTimestamp)
-      expect(userWardrobeHistory[0].creepbitId).to.equal(0)
-      expect(userWardrobeHistory[0].wearerAddress).to.equal(mockNft.address)
-      expect(userWardrobeHistory[0].wearerTokenId).to.equal(0)
-      expect(userWardrobeHistory[0].ownerAddress).to.equal(user1.address)
-
-      expect(creepitWardrobeHistory.length).to.equal(1)
-      expect(creepitWardrobeHistory[0].timeWorn).to.equal(nowTimestamp)
-      expect(creepitWardrobeHistory[0].creepbitId).to.equal(0)
-      expect(creepitWardrobeHistory[0].wearerAddress).to.equal(mockNft.address)
-      expect(creepitWardrobeHistory[0].wearerTokenId).to.equal(0)
-      expect(creepitWardrobeHistory[0].ownerAddress).to.equal(user1.address)
-    })
-
-    it("Should fail adding history if amount sent is too little", async () => {
-      await expect(creepbit.connect(user1).wear(wardrobeItem, {  value: ethers.utils.parseEther("0.19") }))
-        .to.be.revertedWith("Amount sent is too little")
-    })
-
-    it("Should fail adding history if timestamp is invalid", async () => {
-      wardrobeItem.timeWorn = nowTimestamp - 3660
-      await expect(creepbit.connect(user1).wear(wardrobeItem, {  value: ethers.utils.parseEther("0.2") }))
-        .to.be.revertedWith("Invalid timeWorn value")
-    })
-
-    it("Should fail adding history if creepbit doesn't exist", async () => {
-      wardrobeItem.creepbitId = 101
-      await expect(creepbit.connect(user1).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") }))
-        .to.be.revertedWith('OwnerQueryForNonexistentToken()')
-    })
-
-    it("Should fail adding history if user doesn't own the wearerNft", async () => {
-      wardrobeItem.creepbitId = 2
-      wardrobeItem.ownerAddress = user2.address
-
-      await expect(creepbit.connect(user2).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") }))
-        .to.be.revertedWith("User doesn\'t own the wearer nft")
-    })
-
-    it("Should fail adding history if user doesn't own the creepbit", async () => {
-      wardrobeItem.creepbitId = 2
-      await expect(creepbit.connect(user1).wear(wardrobeItem,  { value: ethers.utils.parseEther("0.2") }))
-        .to.be.revertedWith("Sender doesn't own the creepbit")
-    })
-
-    it("Should fail adding history if wearerNft not whitelisted", async () => {
-      await creepbit.removeWhitelistWearerAddress([mockNft.address])
-      await expect(creepbit.connect(user1).wear(wardrobeItem,  { value: ethers.utils.parseEther("0.2") }))
-        .to.be.revertedWith("Wearer contract must be whitelisted")
-    })
-  })
+  // describe("wear", () => {
+  //   let mockNft
+  //   let wardrobeItem
+  //   let nowTimestamp
+  //
+  //   beforeEach(async () => {
+  //     const MockNft = await ethers.getContractFactory('MockNft')
+  //     mockNft = await MockNft.deploy()
+  //     await mockNft.deployed()
+  //
+  //     await mockNft.mint(user1.address, 2)
+  //
+  //     await creepbit.setPause(false)
+  //     await creepbit.setWhitelistMintingPeriod(false)
+  //     await creepbit.connect(user1).mint(2, { value: ethers.utils.parseEther("0.04") })
+  //     await creepbit.connect(user2).mint(2, { value: ethers.utils.parseEther("0.04") })
+  //     await creepbit.addWhitelistWearerAddress([mockNft.address])
+  //
+  //     nowTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
+  //
+  //     wardrobeItem = {
+  //       timeWorn: nowTimestamp,
+  //       creepbitId: 0,
+  //       wearerAddress: mockNft.address,
+  //       wearerTokenId: 0,
+  //       ownerAddress: user1.address
+  //     }
+  //   })
+  //
+  //   it("Should store history when input it valid", async () => {
+  //     await creepbit.connect(user1).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") })
+  //     const userWardrobeHistory = await creepbit.getUserWardrobeHistory(user1.address)
+  //     const creepitWardrobeHistory = await creepbit.getCreepbitWardrobeHistory(0)
+  //
+  //     expect(userWardrobeHistory.length).to.equal(1)
+  //     expect(userWardrobeHistory[0].timeWorn).to.equal(nowTimestamp)
+  //     expect(userWardrobeHistory[0].creepbitId).to.equal(0)
+  //     expect(userWardrobeHistory[0].wearerAddress).to.equal(mockNft.address)
+  //     expect(userWardrobeHistory[0].wearerTokenId).to.equal(0)
+  //     expect(userWardrobeHistory[0].ownerAddress).to.equal(user1.address)
+  //
+  //     expect(creepitWardrobeHistory.length).to.equal(1)
+  //     expect(creepitWardrobeHistory[0].timeWorn).to.equal(nowTimestamp)
+  //     expect(creepitWardrobeHistory[0].creepbitId).to.equal(0)
+  //     expect(creepitWardrobeHistory[0].wearerAddress).to.equal(mockNft.address)
+  //     expect(creepitWardrobeHistory[0].wearerTokenId).to.equal(0)
+  //     expect(creepitWardrobeHistory[0].ownerAddress).to.equal(user1.address)
+  //   })
+  //
+  //   it("Should fail adding history if amount sent is too little", async () => {
+  //     await expect(creepbit.connect(user1).wear(wardrobeItem, {  value: ethers.utils.parseEther("0.19") }))
+  //       .to.be.revertedWith("Amount sent is too little")
+  //   })
+  //
+  //   it("Should fail adding history if timestamp is invalid", async () => {
+  //     wardrobeItem.timeWorn = nowTimestamp - 3660
+  //     await expect(creepbit.connect(user1).wear(wardrobeItem, {  value: ethers.utils.parseEther("0.2") }))
+  //       .to.be.revertedWith("Invalid timeWorn value")
+  //   })
+  //
+  //   it("Should fail adding history if creepbit doesn't exist", async () => {
+  //     wardrobeItem.creepbitId = 101
+  //     await expect(creepbit.connect(user1).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") }))
+  //       .to.be.revertedWith('OwnerQueryForNonexistentToken()')
+  //   })
+  //
+  //   it("Should fail adding history if user doesn't own the wearerNft", async () => {
+  //     wardrobeItem.creepbitId = 2
+  //     wardrobeItem.ownerAddress = user2.address
+  //
+  //     await expect(creepbit.connect(user2).wear(wardrobeItem, { value: ethers.utils.parseEther("0.2") }))
+  //       .to.be.revertedWith("User doesn\'t own the wearer nft")
+  //   })
+  //
+  //   it("Should fail adding history if user doesn't own the creepbit", async () => {
+  //     wardrobeItem.creepbitId = 2
+  //     await expect(creepbit.connect(user1).wear(wardrobeItem,  { value: ethers.utils.parseEther("0.2") }))
+  //       .to.be.revertedWith("Sender doesn't own the creepbit")
+  //   })
+  //
+  //   it("Should fail adding history if wearerNft not whitelisted", async () => {
+  //     await creepbit.removeWhitelistWearerAddress([mockNft.address])
+  //     await expect(creepbit.connect(user1).wear(wardrobeItem,  { value: ethers.utils.parseEther("0.2") }))
+  //       .to.be.revertedWith("Wearer contract must be whitelisted")
+  //   })
+  // })
 
   describe("Prod states", () => {
     it("whitelisting", async () => {

@@ -8,27 +8,12 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
 import "./MerkleWhitelist.sol";
-import "hardhat/console.sol";
 
 contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     using Strings for uint256;
-
-    struct WardrobeItem {
-        uint256 timeWorn;
-
-        uint256 creepbitId;
-
-        // NFT address of the collection that's being worn with the watch
-        address wearerAddress;
-        uint256 wearerTokenId;
-
-        address ownerAddress;
-    }
-
     string baseURI;
 
     uint256 public cost = 0.02 ether;
-    uint256 public wearCost = 0.2 ether;
     uint256 public maxSupply = 10000;
     uint256 public maxMintAmount = 10;
 
@@ -38,10 +23,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
     string public notRevealedUri;
 
     mapping(address => bool) private claimedWhitelist;
-
-    mapping(address => WardrobeItem[]) private userWardrobeHistory;
-    mapping(uint256 => WardrobeItem[]) private creepbitWardrobeHistory;
-    mapping(address => bool) private whitelistedContracts;
 
     constructor(
         string memory _name,
@@ -57,35 +38,12 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     // External functions
 
-    function wear(WardrobeItem calldata wardrobeHistory) external payable {
-        require(msg.value >= wearCost, "Amount sent is too little");
-        require(whitelistedContracts[wardrobeHistory.wearerAddress], "Wearer contract must be whitelisted");
-        require(msg.sender == wardrobeHistory.ownerAddress, "Owner address doesn't match");
-
-        address ownerOfCreepbit = ownerOf(wardrobeHistory.creepbitId);
-
-        require(ownerOfCreepbit == msg.sender, "Sender doesn't own the creepbit");
-        require(block.timestamp - 3600 < wardrobeHistory.timeWorn, "Invalid timeWorn value");
-
-        IERC721 wearerNft = IERC721(wardrobeHistory.wearerAddress);
-        address wearerNftOwner = wearerNft.ownerOf(wardrobeHistory.wearerTokenId);
-
-        require(wearerNftOwner == msg.sender, "User doesn't own the wearer nft");
-
-        userWardrobeHistory[msg.sender].push(wardrobeHistory);
-        creepbitWardrobeHistory[wardrobeHistory.creepbitId].push(wardrobeHistory);
-    }
-
     function setReveal(bool _state) external onlyOwner {
         revealed = _state;
     }
 
     function setCost(uint256 _newCost) external onlyOwner {
         cost = _newCost;
-    }
-
-    function setWearCost(uint256 _newCost) external onlyOwner {
-        wearCost = _newCost;
     }
 
     function setMaxMintAmount(uint256 _newMaxMintAmount) external onlyOwner {
@@ -98,18 +56,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
 
     function setWhitelistMintingPeriod(bool _state) external onlyOwner {
         whitelistMintingPeriod = _state;
-    }
-
-    function addWhitelistWearerAddress(address[] calldata contracts) external onlyOwner {
-        for (uint256 i = 0; i < contracts.length; i++) {
-            whitelistedContracts[contracts[i]] = true;
-        }
-    }
-
-    function removeWhitelistWearerAddress(address[] calldata contracts) external onlyOwner {
-        for (uint256 i = 0; i < contracts.length; i++) {
-            delete whitelistedContracts[contracts[i]];
-        }
     }
 
     function mint(uint256 _mintAmount) external payable {
@@ -161,14 +107,6 @@ contract Creepbit is ERC721A, Ownable, MerkleWhitelist, PaymentSplitter {
         }
 
         return ownedTokenIds;
-    }
-
-    function getUserWardrobeHistory(address user) external view returns (WardrobeItem[] memory) {
-        return userWardrobeHistory[user];
-    }
-
-    function getCreepbitWardrobeHistory(uint256 tokenId) external view returns (WardrobeItem[] memory) {
-        return creepbitWardrobeHistory[tokenId];
     }
 
     function getMerkleRootHash() external view onlyOwner returns (bytes32) {
