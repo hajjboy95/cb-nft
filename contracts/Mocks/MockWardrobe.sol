@@ -7,7 +7,7 @@ import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
-contract Wardrobe is Initializable, OwnableUpgradeable {
+contract MockWardrobe is Initializable, OwnableUpgradeable {
 
     struct WardrobeItem {
         uint256 timeWorn;
@@ -40,30 +40,26 @@ contract Wardrobe is Initializable, OwnableUpgradeable {
 
 
     function wear(WardrobeItem calldata wardrobeHistory) external payable {
-
+        require(false, 'THIS IS A MOCK');
     }
 
     function addWhitelistWearerAddress(address[] calldata contracts) external onlyOwner {
-        for (uint256 i = 0; i < contracts.length; i++) {
-            whitelistedContracts[contracts[i]] = true;
-        }
+        require(false, 'THIS IS A MOCK');
     }
 
     function removeWhitelistWearerAddress(address[] calldata contracts) external onlyOwner {
-        for (uint256 i = 0; i < contracts.length; i++) {
-            delete whitelistedContracts[contracts[i]];
-        }
+        require(false, 'THIS IS A MOCK');
     }
 
     function setWearCost(uint256 _newCost) external onlyOwner {
-        wearCost = _newCost;
+        require(false, 'THIS IS A MOCK');
     }
 
     function getUserWardrobeHistory(address user) external view returns (WardrobeItem[] memory) {
-        return userWardrobeHistory[user];
+        require(false, 'THIS IS A MOCK');
     }
 
     function getCreepbitWardrobeHistory(uint256 tokenId) external view returns (WardrobeItem[] memory) {
-        return creepbitWardrobeHistory[tokenId];
+        require(false, 'THIS IS A MOCK');
     }
 }

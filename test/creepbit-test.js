@@ -11,7 +11,7 @@ describe('Creepbit', async () => {
   let user1
   let user2
 
-  beforeEach( async () => {
+  beforeEach(async () => {
     [owner, user1, user2] = await ethers.getSigners()
 
     const Creepbit = await ethers.getContractFactory('Creepbit')
@@ -30,13 +30,13 @@ describe('Creepbit', async () => {
   })
 
   describe('Init state', async () => {
-    it ('Should set the correct owner', async () => {
-      expect(await creepbit.owner()).to.equal(owner.address);
+    it('Should set the correct owner', async () => {
+      expect(await creepbit.owner()).to.equal(owner.address)
     })
 
     it('Should have correct initial state', async () => {
       expect(await creepbit.maxSupply()).to.be.equal(10000)
-      expect((await creepbit.cost()).toString()).to.be.equal(ethers.utils.parseEther("0.02"))
+      expect((await creepbit.cost()).toString()).to.be.equal(ethers.utils.parseEther('0.02'))
       // expect((await creepbit.wearCost()).toString()).to.be.equal(ethers.utils.parseEther("0.2"))
       expect(await creepbit.maxMintAmount()).to.be.equal(10)
       expect(await creepbit.paused()).to.be.equal(true)
@@ -56,7 +56,7 @@ describe('Creepbit', async () => {
         '0xd18ac455643263f235bdcc7893ac970611f4e16eeb2d38cde066eef88bff646a'
       ]
 
-      await creepbit.connect(user1).whitelistMint(2, proof, { value: ethers.utils.parseEther("0.04") })
+      await creepbit.connect(user1).whitelistMint(2, proof, { value: ethers.utils.parseEther('0.04') })
 
       expect(await creepbit.balanceOf(user1.address)).to.equal(2)
     })
@@ -71,19 +71,19 @@ describe('Creepbit', async () => {
         '0xd18ac455643263f235bdcc7893ac970611f4e16eeb2d38cde066eef88bff646a'
       ]
 
-      await creepbit.connect(user1).whitelistMint(2, proof, { value: ethers.utils.parseEther("0.04") })
+      await creepbit.connect(user1).whitelistMint(2, proof, { value: ethers.utils.parseEther('0.04') })
 
       expect(await creepbit.balanceOf(user1.address)).to.equal(2)
 
       await expect(creepbit.connect(user1).whitelistMint(2, proof,
-        { value: ethers.utils.parseEther("0.04") }))
+        { value: ethers.utils.parseEther('0.04') }))
         .to.be.revertedWith('Already claimed your whitelist slot')
 
       expect(await creepbit.balanceOf(user1.address)).to.equal(2)
     })
   })
 
-  describe("Mint", async () => {
+  describe('Mint', async () => {
     it('Should mint when not paused and not whitelist period', async () => {
       await creepbit.setPause(false)
       await creepbit.setWhitelistMintingPeriod(false)
@@ -124,13 +124,13 @@ describe('Creepbit', async () => {
     it('Should revert mint when above maxAmount', async () => {
       await creepbit.setPause(false)
       await creepbit.setWhitelistMintingPeriod(false)
-      await expect(creepbit.mint(11)).to.be.revertedWith("Above max mint threshold")
+      await expect(creepbit.mint(11)).to.be.revertedWith('Above max mint threshold')
     })
 
     it('Should revert mint when paused', async () => {
       await creepbit.setPause(true)
       await creepbit.setWhitelistMintingPeriod(false)
-      await expect(creepbit.mint(2)).to.be.revertedWith("Currently paused")
+      await expect(creepbit.mint(2)).to.be.revertedWith('Currently paused')
     })
 
     it('Should revert mint when not whitelist period', async () => {
@@ -138,9 +138,8 @@ describe('Creepbit', async () => {
       await creepbit.setWhitelistMintingPeriod(true)
 
       await expect(creepbit.connect(user2).mint(2,
-        { value: ethers.utils.parseEther("0.04") })).
-      to.be.revertedWith('Whitelist minting period is currently on')
-
+        { value: ethers.utils.parseEther('0.04') }))
+        .to.be.revertedWith('Whitelist minting period is currently on')
     })
 
     it('Should revert mint if mint cost is too low for amount', async () => {
@@ -148,15 +147,15 @@ describe('Creepbit', async () => {
       await creepbit.setWhitelistMintingPeriod(false)
 
       await expect(creepbit.connect(user1).mint(2,
-        { value: ethers.utils.parseEther("0.03") })).to.be.revertedWith("Mint cost too low")
+        { value: ethers.utils.parseEther('0.03') })).to.be.revertedWith('Mint cost too low')
     })
   })
 
-  describe("walletOfOwner", () => {
-    it("Should return the indexes of the nfts, when successfully minted", async () => {
+  describe('walletOfOwner', () => {
+    it('Should return the indexes of the nfts, when successfully minted', async () => {
       await creepbit.setPause(false)
       await creepbit.setWhitelistMintingPeriod(false)
-      await creepbit.connect(user1).mint(2, { value: ethers.utils.parseEther("0.04") })
+      await creepbit.connect(user1).mint(2, { value: ethers.utils.parseEther('0.04') })
       const indexBalances = await creepbit.walletOfOwner(user1.address)
 
       await expect(indexBalances.length).to.be.equal(2)
@@ -165,23 +164,22 @@ describe('Creepbit', async () => {
     })
   })
 
-  describe("PaymentSplitter", () => {
+  describe('PaymentSplitter', () => {
+    beforeEach(async () => {
+      await creepbit.setPause(false)
+      await creepbit.setWhitelistMintingPeriod(false)
 
-   beforeEach(async () => {
-     await creepbit.setPause(false)
-     await creepbit.setWhitelistMintingPeriod(false)
+      await creepbit.connect(user1).mint(8, { value: ethers.utils.parseEther('0.16') })
+      await creepbit.connect(user2).mint(2, { value: ethers.utils.parseEther('0.04') })
+    })
 
-     await creepbit.connect(user1).mint(8, { value: ethers.utils.parseEther("0.16") })
-     await creepbit.connect(user2).mint(2, { value: ethers.utils.parseEther("0.04") })
-   })
-
-    it("Should have totalShares to equal 100", async () => {
+    it('Should have totalShares to equal 100', async () => {
       const totalShares = await creepbit.totalShares()
       console.log('totalShares', totalShares)
       expect(totalShares.toNumber()).to.equal(100)
     })
 
-    it("Should have the correct share split", async () => {
+    it('Should have the correct share split', async () => {
       const user1Shares = await creepbit.shares(user1.address)
       const user2Shares = await creepbit.shares(user2.address)
 
@@ -282,8 +280,8 @@ describe('Creepbit', async () => {
   //   })
   // })
 
-  describe("Prod states", () => {
-    it("whitelisting", async () => {
+  describe('Prod states', () => {
+    it('whitelisting', async () => {
       await creepbit.setPause(false)
       await creepbit.setWhitelistMintingPeriod(true)
 

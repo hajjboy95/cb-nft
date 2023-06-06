@@ -134,6 +134,27 @@ describe('Wardrobe', async () => {
     })
 
     describe('Proxy', async () => {
+        let mockWardrobe
 
+        beforeEach(async () => {
+            const MockWardrobe = await ethers.getContractFactory('MockWardrobe')
+            mockWardrobe = await MockWardrobe.deploy()
+            await mockWardrobe.deployed()
+        })
+
+        it('Should revert if proxyAdmin calls logic method', async () => {
+            await expect(wardrobe.connect(proxyAdmin).getCreepbitWardrobeHistory(0)).to.be.
+                revertedWith('TransparentUpgradeableProxy: admin cannot fallback to proxy target')
+        })
+        
+        it('Should emit upgraded when contract is upgraded', async () => {
+            await expect(wardrobe.connect(proxyAdmin).upgradeTo(mockWardrobe.address)).to.emit(wardrobe, 'Upgraded');
+        })
+        
+        it('Should call mockWardrobe contract after upgrade', async () => {
+            await wardrobe.connect(proxyAdmin).upgradeTo(mockWardrobe.address)
+            await expect(wardrobe.connect(user1).getUserWardrobeHistory(user1.address)).to.be.revertedWith('THIS IS A MOCK')
+        })
     })
 })
+
